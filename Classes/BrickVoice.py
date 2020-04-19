@@ -7,4 +7,5 @@ class BrickVoice:
         self.Voice = Sound()
 
     def Speak(self, Message):
-        self.Voice.speak(Message)
+        print(Message)
+        #self.Voice.speak(Message)
