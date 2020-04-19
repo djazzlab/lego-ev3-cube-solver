@@ -82,8 +82,6 @@ class ColorSensorArm:
     def GetColor(self):
         RetrievedColors = []
         
-        self.TakeOut()
-
         # Grab colors from the sensor
         Intensity = 0
         for X in range(3):
@@ -100,15 +98,13 @@ class ColorSensorArm:
                 IntensityDistance = TmpDistance
                 Color = ColorName
 
-        self.PutAway()
-
         return Color
 
     def PutAway(self):
-        self.Motor.on(speed = SpeedDPS(500), block = True)
-        self.Motor.off()
+        self.Motor.on(speed = SpeedDPS(250), block = True)
+        self.Motor.off(brake = True)
         self.Motor.reset()
 
-    def TakeOut(self):
-        self.Motor.on_for_rotations(speed = SpeedDPS(500), rotations = -2, block = True)
-        self.Motor.off()
+    def TakeOut(self, Position):
+        self.Motor.on_to_position(speed = SpeedDPS(250), position = Position, block = True)
+        self.Motor.off(brake = True)
