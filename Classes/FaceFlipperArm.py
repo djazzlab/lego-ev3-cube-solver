@@ -13,15 +13,13 @@ class FaceFlipperArm:
 
     def FlipFace(self):
         # Move the arm down on the cube and start face flipping
-        self.Motor.on_to_position(speed = SpeedDPS(100), position = 240)
-
-        # Adjust the cube position
-        self.Motor.on_to_position(speed = SpeedDPS(100), position = 10)
+        self.Motor.on_to_position(speed = SpeedDPS(100), position = 240, block = True)
+        self.Motor.off(brake = True)
 
         # Move to the initial position
         self.PutAway()
 
     def PutAway(self):
         self.Motor.on(speed = SpeedDPS(-100), block = True)
-        self.Motor.off()
+        self.Motor.off(brake = True)
         self.Motor.reset()

@@ -9,9 +9,17 @@ class RotationPlatform:
         self.Motor = LargeMotor(address = MotorPort)
 
         # Initialize rotation platform
-        self.Motor.off()
+        self.Motor.off(brake = True)
         self.Motor.reset()
 
-    def Rotate(self):
-        self.Motor.on_for_degrees(speed = SpeedDPS(150), degrees = 268, block = True)
-        self.Motor.off()
+    def Rotate(self, Degrees):
+        self.Motor.on_for_degrees(speed = SpeedDPS(150), degrees = Degrees, block = True)
+        self.Motor.off(brake = True)
+
+    def RotateOff(self):
+        self.Motor.off(brake = True)
+
+    def RotateOn(self):
+        self.Motor.on(speed = SpeedDPS(150))
+        self.Motor.wait_until_not_moving()
+        
