@@ -8,7 +8,7 @@
             "name": "Download and Run",
             "type": "ev3devBrowser",
             "request": "launch",
-            "program": "/home/robot/lego-ev3-cube-solver/main.py",
+            "program": "/home/robot/lego-ev3-cube-solver/Main.py",
             "interactiveTerminal": true
         }
     ]

@@ -11,3 +11,7 @@ class RotationPlatform:
         # Initialize rotation platform
         self.Motor.off()
         self.Motor.reset()
+
+    def Rotate(self):
+        self.Motor.on_for_degrees(speed = SpeedDPS(150), degrees = 268, block = True)
+        self.Motor.off()
