@@ -13,6 +13,7 @@ from ev3dev2.motor import OUTPUT_A as OutPortA
 from ev3dev2.motor import OUTPUT_B as OutPortB
 from ev3dev2.motor import OUTPUT_C as OutPortC
 
+from time import sleep as Sleep
 #
 # INITIALIZATION
 #
@@ -34,18 +35,18 @@ Ev3ColorSensorArm = ColorSensorArm(MotorPort = OutPortC, SensorPort = InPort2)
 # Color sensor calibration
 Speaker.Speak(Message = 'Please, calibrate the color sensor. Press up for blue, right for green, down for orange, left for red, enter for yellow, nothing for white.')
 for X in range(4):
-    Ev3ColorSensorArm.TakeOut()
+    Ev3ColorSensorArm.TakeOut(Position = -750)
     Speaker.Speak(Message = 'What is the top face color of the cube?')
     Speaker.Speak(Message = '{} face calibrated.'.format(Ev3ColorSensorArm.Calibrate()))
     Ev3ColorSensorArm.PutAway()
     Ev3FaceFlipperArm.FlipFace()
 
 # 1/4 Rotation of the platform + 1 flip
-Ev3RotationPlatform.Rotate()
+Ev3RotationPlatform.Rotate(Degrees = 268)
 Ev3FaceFlipperArm.FlipFace()
 
 # Continue calibration
-Ev3ColorSensorArm.TakeOut()
+Ev3ColorSensorArm.TakeOut(Position = -750)
 Speaker.Speak(Message = 'What is the top face color of the cube?')
 Speaker.Speak(Message = '{} face calibrated.'.format(Ev3ColorSensorArm.Calibrate()))
 Ev3ColorSensorArm.PutAway()
@@ -53,22 +54,45 @@ Ev3ColorSensorArm.PutAway()
 Ev3FaceFlipperArm.FlipFace()
 Ev3FaceFlipperArm.FlipFace()
 
-Ev3ColorSensorArm.TakeOut()
+Ev3ColorSensorArm.TakeOut(Position = -750)
 Speaker.Speak(Message = 'What is the top face color of the cube?')
 Speaker.Speak(Message = '{} face calibrated.'.format(Ev3ColorSensorArm.Calibrate()))
 Ev3ColorSensorArm.PutAway()
 
 Speaker.Speak(Message = 'Thank you!')
 
-# Faces of the cube, named with the color of the middle sticker
-CubeFaces = []
-
 #
 # START
 #
-for X in range(50):
-    for Y in range(4):   
-        Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
-        Ev3FaceFlipperArm.FlipFace()
-    Ev3RotationPlatform.Rotate()
+for X in range(4):
+    Ev3ColorSensorArm.TakeOut(Position = -640)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 110)
+    Ev3ColorSensorArm.TakeOut(Position = -580)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 140)
+    Ev3ColorSensorArm.TakeOut(Position = -660)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 110)
+    Ev3ColorSensorArm.TakeOut(Position = -580)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 140)
+    Ev3ColorSensorArm.TakeOut(Position = -660)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 110)
+    Ev3ColorSensorArm.TakeOut(Position = -580)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 140)
+    Ev3ColorSensorArm.TakeOut(Position = -660)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
+    Sleep(1)
+    Ev3RotationPlatform.Rotate(Degrees = 110)
+    Ev3ColorSensorArm.TakeOut(Position = -580)
+    Speaker.Speak(Message = Ev3ColorSensorArm.GetColor())
     Ev3FaceFlipperArm.FlipFace()
