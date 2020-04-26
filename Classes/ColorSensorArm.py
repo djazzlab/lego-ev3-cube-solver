@@ -1,9 +1,9 @@
+# EV3
 from ev3dev2.button import Button
-from ev3dev2.motor import MediumMotor
-from ev3dev2.motor import SpeedDPS
+from ev3dev2.motor import MediumMotor, SpeedDPS
 from ev3dev2.sensor.lego import ColorSensor
-from ev3dev2.sound import Sound
 
+# Python
 from time import sleep as Sleep
 
 class ColorSensorArm:
@@ -18,16 +18,23 @@ class ColorSensorArm:
     }
     Motor = None
     Sensor = None
+    TotalDegrees = 0
 
+    #
+    # Init
+    # Initialize color sensor arm. First rotate the motor until it stalls.
     def __init__(self, MotorPort, SensorPort):
         self.Button = Button()
         self.Motor = MediumMotor(address = MotorPort)
         self.Sensor = ColorSensor(address = SensorPort)
-
-        # Initialize color sensor arm. First rotate the motor until it stalls.
+        self.Sensor.mode = 'COL-REFLECT'
         self.PutAway()
 
-    def Calibrate(self):
+    #
+    # CalibrateSensor
+    # Calibrate the sensor by asking the operator the color
+    # in front of the sensor using the brick buttons 
+    def CalibrateSensor(self):
         # Wait for a button to be pressed
         # Timeout is 5 sec        
         ElapsedTime = 0
@@ -79,6 +86,9 @@ class ColorSensorArm:
             self.ColorIntensities['White'] = self.ColorIntensities['White'] // 3
             return 'White'
 
+    #
+    # GetColor
+    # Return the color in front of the sensor
     def GetColor(self):
         RetrievedColors = []
         
@@ -100,11 +110,31 @@ class ColorSensorArm:
 
         return Color
 
-    def PutAway(self):
-        self.Motor.on(speed = SpeedDPS(250), block = True)
+    #
+    # MotorOff
+    # Shutdown the motor 
+    def MotorOff(self, Reset = False):
         self.Motor.off(brake = True)
-        self.Motor.reset()
+        if Reset:
+            self.Motor.reset()
+            self.TotalDegrees = 0
 
-    def TakeOut(self, Position):
-        self.Motor.on_to_position(speed = SpeedDPS(250), position = Position, block = True)
-        self.Motor.off(brake = True)
+    #
+    # PutAway
+    # Put the arm away
+    def PutAway(self):
+        self.Motor.on(speed = SpeedDPS(500), block = True)
+        self.MotorOff(Reset = True)
+
+    #
+    # TakeOut
+    # Take the arm out
+    def TakeOut(self, Degrees):
+        self.TotalDegrees += Degrees
+        print('Current degrees: {}'.format(self.TotalDegrees))
+        self.Motor.on_for_degrees(speed = SpeedDPS(150), degrees = Degrees, block = True)
+        
+        if self.TotalDegrees >= 1080:
+            self.MotorOff(Reset = True)
+        else:
+            self.MotorOff()
