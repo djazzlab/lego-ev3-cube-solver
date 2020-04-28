@@ -1,112 +1,63 @@
 # EV3
-from ev3dev2.motor import LargeMotor, SpeedDPS
+from ev3dev2.motor import LargeMotor
 
-class TurnTable:
-    Motor = None
+# Local resources
+from Classes.Ev3Motor import Ev3Motor
 
+class TurnTable(Ev3Motor):
     #
     # Init
     # Initialize the motor
     def __init__(self, MotorPort):
-        self.Motor = LargeMotor(address = MotorPort)
-
-        # Init the motor
-        self.__SetStopAction(Action = 'hold')
-        self.InitPosition()
-
-    ###################
-    # Exposed Methods #
-    ###################
+        super().__init__(Motor = LargeMotor(address = MotorPort))
 
     #
-    # HalfQuarterRotate
-    # Rotate the platform for a half quarter rotation
-    def HalfQuarterRotate(self):
-        self.__MotorOnToPosition(Speed = 200, Position = 100)
+    # FullTurn
+    # Turn the table for one full turn
+    # As the gears ratio of the table is 1:3, then the motor has to turn for 360*3=1080
+    def FullTurn(self, Block = True):
+        self.MotorOff(Reset = True)
+        self.SetStopActionHold()
+        self.SetRamps(Up = 0, Down = 0)
+        self.SetSpeed(Speed = 400, SP = True)
+        self.SetPosition(Position = 1080, SP = True)
+        self.SetRunToRelativePosition()
+
+        if Block:
+            self.WaitWhileRunning()
+            self.MotorOff(Reset = True)
 
     #
-    # InitPosition
-    # Initialize the arm position
-    def InitPosition(self):
-        self.__MotorOff(Reset = True)
+    # GetTablePosition
+    # Return the current position of the motor
+    def GetTablePosition(self):
+        return self.GetMotorPosition(SP = True)
 
     #
-    # IsTurning
+    # IsTableTurning
     # Expose the motor state: true if the table is turning
-    def IsTurning(self):
-        return True if 'running' in self.__GetState() else False
-
-    #
-    # QuarterRotate
-    # Rotate the platform for a quarter rotation
-    def QuarterRotate(self):
-        self.__MotorOnToPosition(Speed = 200, Position = 275)
+    def IsTableTurning(self):
+        return True if 'running' in self.GetState() else False
 
     #
     # Stop
     # Stop the motor
-    def Stop(self):
-        self.__MotorOff()
-
-    #
-    # TurnForDegrees
-    # Turn the table for given degrees
-    def TurnForDegrees(self, Degrees):
-        self.__MotorOnForDegress(Speed = 200, Degrees = Degrees)
-        self.__MotorOff()
-
-    #
-    # TurnForever
-    # Turn the table for ever
-    def TurnForever(self, Block, Clockwize = True):
-        Speed = 200
-        if not Clockwize:
-            Speed = -200
-
-        self.__MotorOnForever(Speed = Speed, Block = Block)
-        if Block:
-            self.__MotorOff()
-
-    ###################
-    # Private Methods #
-    ###################
-
-    #
-    # GetState
-    # Return the current states list of the motor
-    def __GetState(self):
-        return self.Motor.state
-
-    #
-    # MotorOff
-    # Shutdown the motor 
-    def __MotorOff(self, Reset = False):
-        self.Motor.stop()
+    def StopTable(self, Reset = False):
+        self.MotorOff(Reset = Reset)
         if Reset:
-            self.Motor.reset()
-            self.Motor.position = 0
-            self.__SetStopAction(Action = 'hold')
+            self.SetPosition(Position = 0, SP = True)
+            self.SetStopActionHold()
 
     #
-    # MotorOnForDegress
-    # Put the motor on to the given position at the given speed
-    def __MotorOnForDegress(self, Speed, Degrees):
-        self.Motor.on_for_degrees(speed = SpeedDPS(Speed), degrees = Degrees, block = True)
+    # TurnForRelativePosition
+    # Turn the table to a relative position to the current position
+    def TurnForRelativePosition(self, RelativePosition, Block = True):
+        self.SetStopActionHold()
+        self.SetRamps(Up = 0, Down = 0)
+        self.SetSpeed(Speed = 400, SP = True)
+        self.SetPosition(Position = RelativePosition, SP = True)
+        self.SetRunToRelativePosition()
 
-    #
-    # MotorOnForever
-    # Put the motor on forever at given speed
-    def __MotorOnForever(self, Speed, Block):
-        self.Motor.on(speed = SpeedDPS(Speed), block = Block)
-
-    #
-    # MotorOnToPosition
-    # Put the motor on to the given position at the given speed
-    def __MotorOnToPosition(self, Speed, Position):
-        self.Motor.on_to_position(speed = SpeedDPS(Speed), position = Position, block = True)
-
-    #
-    # SetStopAction
-    # Define the stop action of the motor
-    def __SetStopAction(self, Action):
-        self.Motor.stop_action = Action
+        if Block:
+            self.WaitWhileRunning()
+            self.MotorOff()
