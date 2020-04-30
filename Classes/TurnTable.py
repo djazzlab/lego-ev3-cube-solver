@@ -12,26 +12,27 @@ class TurnTable(Ev3Motor):
         super().__init__(Motor = LargeMotor(address = MotorPort))
 
     #
-    # FullTurn
-    # Turn the table for one full turn
+    # FullTurnFromPositionZero
+    # Turn the table for one full turn from position 0
     # As the gears ratio of the table is 1:3, then the motor has to turn for 360*3=1080
-    def FullTurn(self, Block = True):
-        self.MotorOff(Reset = True)
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 400, SP = True)
-        self.SetPosition(Position = 1080, SP = True)
-        self.SetRunToRelativePosition()
+    def FullTurnFromPositionZero(self, Block = True):
+        self.Position = 1080
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 400
+        self.StopAction = 'hold'
+
+        self.RunToRelativePosition()
 
         if Block:
             self.WaitWhileRunning()
-            self.MotorOff(Reset = True)
+            self.MotorReset()
 
     #
     # GetTablePosition
     # Return the current position of the motor
     def GetTablePosition(self):
-        return self.GetMotorPosition(SP = True)
+        return self.GetMotorPosition()
 
     #
     # IsTableTurning
@@ -40,23 +41,45 @@ class TurnTable(Ev3Motor):
         return True if 'running' in self.GetState() else False
 
     #
-    # Stop
-    # Stop the motor
-    def StopTable(self, Reset = False):
-        self.MotorOff(Reset = Reset)
-        if Reset:
-            self.SetPosition(Position = 0, SP = True)
-            self.SetStopActionHold()
+    # QuarterTurn
+    # Turn the table for one quarter
+    def QuarterTurn(self, Clockwise = True):
+        self.Position = 270 if Clockwise else -270
+        self.RampDown = 300
+        self.RampUp = 0
+        self.Speed = 600
+        self.StopAction = 'hold'
+
+        self.RunToRelativePosition()
+        
+        self.WaitWhileRunning()
+        self.MotorOff()
 
     #
-    # TurnForRelativePosition
+    # ResetTable
+    # Reset the table motor
+    def ResetTable(self):
+        self.MotorReset()
+        
+    #
+    # StopTable
+    # Stop the table motor
+    def StopTable(self, Reset = False):
+        self.MotorOff()
+        if Reset:
+            self.MotorReset()
+
+    #
+    # TurnToRelativePosition
     # Turn the table to a relative position to the current position
-    def TurnForRelativePosition(self, RelativePosition, Block = True):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 400, SP = True)
-        self.SetPosition(Position = RelativePosition, SP = True)
-        self.SetRunToRelativePosition()
+    def TurnToRelativePosition(self, RelativePosition, Block = True):
+        self.Position = RelativePosition
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 400
+        self.StopAction = 'hold'
+
+        self.RunToRelativePosition()
 
         if Block:
             self.WaitWhileRunning()

@@ -30,53 +30,43 @@ class BrickButton:
     # ButtonDown
     # Private method associated with the brick down button
     def __ButtonDown(self, State):
-        if State:
+        while self.Button.down:
             print('Down button pressed')
             if self.ButtonDownCallbackFunc is not None:
                 self.ButtonDownCallbackFunc(**self.ButtonDownCallbackArgs)
-        else:
-            print('Down button released')
 
     #
     # ButtonEnter
     # Private method associated with the brick enter button
     def __ButtonEnter(self, State):
-        if State:
+        while self.Button.enter:
             print('Enter button pressed')
             if self.ButtonEnterCallbackFunc is not None:
                 self.ButtonEnterCallbackFunc(**self.ButtonEnterCallbackArgs)
-        else:
-            print('Enter button released')
 
     #
     # ButtonLeft
     # Private method associated with the brick left button
     def __ButtonLeft(self, State):
-        if State:
+        while self.Button.left:
             print('Left button pressed')
             if self.ButtonLeftCallbackFunc is not None:
                 self.ButtonLeftCallbackFunc(**self.ButtonLeftCallbackArgs)
-        else:
-            print('Left button released')
     
     #
     # ButtonRight
     # Private method associated with the brick right button
     def __ButtonRight(self, State):
-        if State:
+        while self.Button.right:
             print('Right button pressed')
             if self.ButtonRightCallbackFunc is not None:
                 self.ButtonRightCallbackFunc(**self.ButtonRightCallbackArgs)
-        else:
-            print('Right button released')
 
     #
     # ButtonUp
     # Private method associated with the brick up button
     def __ButtonUp(self, State):
-        if State:
+        while self.Button.up:
             print('Up button pressed')
             if self.ButtonUpCallbackFunc is not None:
                self.ButtonUpCallbackFunc(**self.ButtonUpCallbackArgs)
-        else:
-            print('Up button released')

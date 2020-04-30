@@ -15,22 +15,26 @@ class ColorSensorArm(Ev3Motor):
     # InitArmPosition
     # Initialize the arm position
     def InitArmPosition(self):
-        self.SetStopActionBrake()
-        self.SetSpeed(Speed = 500, SP = True)
-        self.SetRunForever()
+        self.Speed = 500
+        self.StopAction = 'hold'
+        
+        self.RunForever()
+
         self.WaitUntilStalled()
-        self.MotorOff(Reset = True)
-        self.SetPosition(Position = 0, SP = True)
+        self.MotorReset()
 
     #
     # PutAway
     # Put the sensor arm away of the cube
     def PutAway(self):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 1200, SP = True)
-        self.SetPosition(Position = 0, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = 0
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 1200
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()
 
@@ -38,11 +42,14 @@ class ColorSensorArm(Ev3Motor):
     # PutHalfAway
     # Put the sensor arm away of the cube
     def PutHalfAway(self):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 1200, SP = True)
-        self.SetPosition(Position = -400, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = -400
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 1200
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()
 
@@ -50,11 +57,14 @@ class ColorSensorArm(Ev3Motor):
     # TakeOutCorner
     # Take out the arm to the cube corner in front of the sensor
     def TakeOutCorner(self):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 1200, SP = True)
-        self.SetPosition(Position = -580, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = -580
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 300
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()
 
@@ -62,11 +72,14 @@ class ColorSensorArm(Ev3Motor):
     # TakeOutEdge
     # Take out the arm to the cube edge in front of the sensor
     def TakeOutEdge(self):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 1200, SP = True)
-        self.SetPosition(Position = -650, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = -650
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 300
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()
 
@@ -74,10 +87,13 @@ class ColorSensorArm(Ev3Motor):
     # TakeOutMiddle
     # Take out the arm to the middle of the cube top face
     def TakeOutMiddle(self):
-        self.SetStopActionHold()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 1200, SP = True)
-        self.SetPosition(Position = -750, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = -750
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 1200
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+        
         self.WaitWhileRunning()
         self.MotorOff()

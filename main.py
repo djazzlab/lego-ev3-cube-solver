@@ -21,9 +21,29 @@ from Classes.TurnTable import TurnTable
 # Python
 from time import sleep as Sleep
 
+#            01 02 03
+#            04 05 06
+#            07 08 09
+#  10 11 12  19 20 21  28 29 30  37 38 39
+#  13 14 15  22 23 24  31 32 33  40 41 42
+#  16 17 18  25 26 27  34 35 36  43 44 45
+#            46 47 48
+#            49 50 51
+#            52 53 54 
+
 class CubeSolver:
+    CubeMiddleSquareIndexes = [ 5, 32, 50, 23, 14, 41 ]
+    CubeScannedFaces = 0
     CubeSquareColors = {}
-    CubeMiddleSquareIndexes = [ 5, 32, 50, 14, 23, 41 ]
+    CubeSquareIndex = 0
+    CubeSquareScanOrder = [
+        5, 3, 2, 1, 4, 7, 8, 9, 6,
+        32, 36, 33, 30, 29, 28, 31, 34, 35,
+        50, 52, 53, 54, 51, 48, 47, 46, 49,
+        23, 19, 22, 25, 26, 27, 24, 21, 20,
+        14, 16, 17, 18, 15, 12, 11, 10, 13,
+        41, 43, 44, 45, 42, 39, 38, 37, 40
+    ]
     Ev3Button = None
     Ev3ColorSensorArm = None
     Ev3ColorSensorUnit = None
@@ -31,7 +51,6 @@ class CubeSolver:
     Ev3ShufflerArm = None
     Ev3Speaker = None
     Ev3TurnTable = None
-    FaceSquareIndexTransformations = [ 0, -2, -1, -1, 3, 3, 1, 1, -3 ]
 
     ##########################
     # Initialization Methods #
@@ -77,9 +96,9 @@ class CubeSolver:
         # Rotation platform calibration
         # +/- 3 degrees because the ratio between the wheels is 3 (12 and 36 pins)
         # So to rotate the big wheel for 1 degree, the small one (and therefor the motor) has to rotate for 3 degrees
-        self.Ev3Button.ButtonLeftCallbackFunc = self.Ev3TurnTable.TurnForRelativePosition
+        self.Ev3Button.ButtonLeftCallbackFunc = self.Ev3TurnTable.TurnToRelativePosition
         self.Ev3Button.ButtonLeftCallbackArgs['RelativePosition'] = -1
-        self.Ev3Button.ButtonRightCallbackFunc = self.Ev3TurnTable.TurnForRelativePosition
+        self.Ev3Button.ButtonRightCallbackFunc = self.Ev3TurnTable.TurnToRelativePosition
         self.Ev3Button.ButtonRightCallbackArgs['RelativePosition'] = 1
 
         while True:
@@ -89,7 +108,7 @@ class CubeSolver:
             self.Ev3Button.Button.process()
             Sleep(.01)
 
-        self.Ev3TurnTable.StopTable(Reset = True)
+        self.Ev3TurnTable.ResetTable()
 
         # Adjust the cube initial position once the table is correctly initialized
         self.Ev3ShufflerArm.PutArmDown()
@@ -100,9 +119,26 @@ class CubeSolver:
     # Scan
     # Scan the cube
     def Scan(self):
-        for CubeMiddleSquareIndex in self.CubeMiddleSquareIndexes:
-            self.__ScanCubeTopFace(CubeSquareIndex = CubeMiddleSquareIndex)
-            #self.Ev3ShufflerArm.FlipCube()
+        self.CubeScannedFaces = 0
+        for CubeFaceIndex in range(6):
+            self.__ScanCubeTopFace()
+            self.CubeScannedFaces += 1
+
+            if self.CubeScannedFaces == 3:
+                self.Ev3TurnTable.QuarterTurn(Clockwise = False)
+                self.Ev3ShufflerArm.FlipCube()
+            elif self.CubeScannedFaces == 4:
+                self.Ev3TurnTable.QuarterTurn()
+                self.Ev3ShufflerArm.FlipCube()
+            elif self.CubeScannedFaces == 6:
+                self.Ev3TurnTable.QuarterTurn(Clockwise = False)
+                self.Ev3ShufflerArm.FlipCube()
+                self.Ev3TurnTable.QuarterTurn()
+                self.Ev3ShufflerArm.PutArmDown()
+                Sleep(.5)
+                self.Ev3ShufflerArm.PutArmUp()
+            else:
+                self.Ev3ShufflerArm.FlipCube()
 
     ###################
     # Private Methods #
@@ -110,37 +146,43 @@ class CubeSolver:
     #
     # ScanCubeTopFace
     # Scan the top face of the cube
-    def __ScanCubeTopFace(self, CubeSquareIndex):
+    def __ScanCubeTopFace(self):
         if self.Ev3ShufflerArm.GetArmPosition() > 35:
             self.Ev3ShufflerArm.PutArmUp()
 
         SquareCounter = 0
 
         self.Ev3ColorSensorArm.TakeOutMiddle()
-        self.CubeSquareColors[CubeSquareIndex] = self.Ev3ColorSensorUnit.GetRGBColor()
+        self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRGBColor()
 
+        self.CubeSquareIndex += 1
         self.Ev3ColorSensorArm.TakeOutCorner()
         SquareCounter += 1
 
         # Full turn of the table, but do not block so the process can continue
-        self.Ev3TurnTable.FullTurn(Block = False)
+        self.Ev3TurnTable.FullTurnFromPositionZero(Block = False)
 
         while self.Ev3TurnTable.IsTableTurning():
             CurrentPosition = self.Ev3TurnTable.GetTablePosition()
             
             if CurrentPosition >= (SquareCounter * 135) - 5:
-                CubeSquareIndex = CubeSquareIndex + self.FaceSquareIndexTransformations[SquareCounter]
-                self.CubeSquareColors[CubeSquareIndex] = self.Ev3ColorSensorUnit.GetRGBColor()
+                self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRGBColor()
                 
+                self.CubeSquareIndex += 1
                 SquareCounter += 1
 
                 if SquareCounter == 9:
-                    self.Ev3TurnTable.StopTable(Reset = True)
-                    self.Ev3ColorSensorArm.PutHalfAway()
+                    if self.CubeScannedFaces == 5:
+                        self.Ev3ColorSensorArm.PutAway()
+                    else:
+                        self.Ev3ColorSensorArm.PutHalfAway()
                 elif SquareCounter % 2:
                     self.Ev3ColorSensorArm.TakeOutCorner()
                 else:
                     self.Ev3ColorSensorArm.TakeOutEdge()
+
+            if SquareCounter == 9:
+                self.Ev3TurnTable.StopTable()
 
 ################
 # Main Program #

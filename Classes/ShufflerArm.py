@@ -4,9 +4,10 @@ from ev3dev2.motor import LargeMotor
 # Local resources
 from Classes.Ev3Motor import Ev3Motor
 
-class ShufflerArm(Ev3Motor):
-    __HoldCubePosition = 85
+# Python
+from time import sleep as Sleep
 
+class ShufflerArm(Ev3Motor):
     #
     # Init
     # Initialize face switcher arm
@@ -20,17 +21,23 @@ class ShufflerArm(Ev3Motor):
         Position = self.GetArmPosition()
 
         # Make sure the cube is always at the same position before flipping it
-        if (Position <= self.__HoldCubePosition - 10) or (Position >= self.__HoldCubePosition + 10):
+        if (Position <= 75) or (Position >= 95):
             self.PutArmDown()
 
         # Flipping
-        self.SetStopActionBrake()
-        self.SetRamps(Up = 200, Down = 0)
-        self.SetSpeed(Speed = 400, SP = True)
-        self.SetPosition(Position = 180, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = 180
+        self.RampDown = 0
+        self.RampUp = 200
+        self.Speed = 400
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+        
         self.WaitWhileRunning()
         self.MotorOff()
+
+        # Sleep 0.5 secondes
+        Sleep(.5)
         
         # Put the cube at the starting position before the flip
         self.PutArmUp()
@@ -39,30 +46,36 @@ class ShufflerArm(Ev3Motor):
     # GetArmPosition
     # Return the current position of the motor
     def GetArmPosition(self):
-        return self.GetMotorPosition(SP = True)
+        return self.GetMotorPosition()
 
     #
     # InitArmPosition
     # Initialize the arm position
     def InitArmPosition(self):
-        self.SetStopActionBrake()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = -130, SP = True)
-        self.SetRunForever()
+        self.Position = 85
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = -130
+        self.StopAction = 'hold'
+
+        self.RunForever()
+        
         self.WaitUntilStalled()
-        self.MotorOff(Reset = True)
-        self.SetPosition(Position = 0, SP = True)
+        self.MotorReset()
 
     #
     # PutArmDown
     # Move the arm down to the cube but do not flip the top face
     # Useful to reset the cube location on the turn table
     def PutArmDown(self):
-        self.SetStopActionBrake()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 400, SP = True)
-        self.SetPosition(Position = self.__HoldCubePosition, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = 85
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 200
+        self.StopAction = 'hold'
+        
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()
 
@@ -70,10 +83,13 @@ class ShufflerArm(Ev3Motor):
     # PutArmUp
     # Move the arm up so the cube can be scanned or fully rotated
     def PutArmUp(self):
-        self.SetStopActionBrake()
-        self.SetRamps(Up = 0, Down = 0)
-        self.SetSpeed(Speed = 400, SP = True)
-        self.SetPosition(Position = 0, SP = True)
-        self.SetRunToAbsolutePosition()
+        self.Position = 0
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 200
+        self.StopAction = 'hold'
+
+        self.RunToAbsolutePosition()
+
         self.WaitWhileRunning()
         self.MotorOff()

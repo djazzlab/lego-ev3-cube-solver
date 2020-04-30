@@ -1,5 +1,10 @@
 class Ev3Motor:
     __Motor = None
+    _Position = 0
+    _RampDown = 0
+    _RampUp = 0
+    _Speed = 0
+    _StopAction = None
 
     #
     # Init
@@ -7,94 +12,191 @@ class Ev3Motor:
     def __init__(self, Motor):
         self.__Motor = Motor
 
+    ######################
+    # Properties Methods #
+    ######################
     #
-    # GetMotorPosition
-    # Returns the motor position
-    def GetMotorPosition(self, SP = False):
-        if SP:
-            return self.__Motor.position_sp
-        return self.__Motor.position
+    # Position property
+    @property
+    def Position(self):
+        return self._Position
+    
+    @Position.setter
+    def Position(self, Position):
+        if not isinstance(Position, int):
+            raise ValueError('Not integer Position is not possible')
+
+        self._Position = Position
+
+    @Position.deleter
+    def Position(self):
+        del self._Position
 
     #
-    # GetPolarity
-    # Returns motor polarity
-    def GetPolarity(self):
-        return self.__Motor.polarity
+    # RampDown property
+    @property
+    def RampDown(self):
+        return self._RampDown
+    
+    @RampDown.setter
+    def RampDown(self, RampDown):
+        if not isinstance(RampDown, int):
+            raise ValueError('Not integer RampDown is not possible')
+
+        self._RampDown = RampDown
+
+    @RampDown.deleter
+    def RampDown(self):
+        del self._RampDown
+
+    #
+    # RampUp property
+    @property
+    def RampUp(self):
+        return self._RampUp
+    
+    @RampUp.setter
+    def RampUp(self, RampUp):
+        if not isinstance(RampUp, int):
+            raise ValueError('Not integer RampUp is not possible')
+
+        self._RampUp = RampUp
+
+    @RampUp.deleter
+    def RampUp(self):
+        del self._RampUp
+
+    #
+    # Speed property
+    @property
+    def Speed(self):
+        return self._Speed
+    
+    @Speed.setter
+    def Speed(self, Speed):
+        if not isinstance(Speed, int):
+            raise ValueError('Not integer Speed is not possible')
+
+        self._Speed = Speed
+
+    @Speed.deleter
+    def Speed(self):
+        del self._Speed
+
+    #
+    # StopAction property
+    @property
+    def StopAction(self):
+        return self._StopAction
+    
+    @StopAction.setter
+    def StopAction(self, StopAction):
+        StopActions = [
+            self.__Motor.STOP_ACTION_BRAKE,
+            self.__Motor.STOP_ACTION_COAST,
+            self.__Motor.STOP_ACTION_HOLD
+        ]
+
+        if StopAction not in StopActions:
+            raise ValueError('StopAction should be one of {}'.format(StopActions))
+
+        self._StopAction = StopAction
+
+    @StopAction.deleter
+    def StopAction(self):
+        del self._StopAction
+
+    ##################
+    # Public Methods #
+    ##################
+
+    #
+    # GetMotorPosition
+    # Returns the current position of the motor
+    def GetMotorPosition(self):
+        return self.__Motor.position_sp
+
+    #
+    # GetMotorRampDown
+    # Returns the current ramp down of the motor
+    def GetMotorRampDown(self):
+        return self.__Motor.ramp_down_sp
+
+    #
+    # GetMotorRampUp
+    # Returns the current ramp up of the motor
+    def GetMotorRampUp(self):
+        return self.__Motor.ramp_up_sp
+
+    #
+    # GetMotorSpeed
+    # Returns the current speed of the motor
+    def GetMotorSpeed(self):
+        return self.__Motor.speed_sp
+
+    #
+    # GetMotorStopAction
+    # Returns the current stop action of the motor
+    def GetMotorStopAction(self):
+        return self.__Motor.stop_action
 
     #
     # GetState
-    # Return the current states list of the motor
+    # Returns the current states list of the motor
     def GetState(self):
         return self.__Motor.state
 
     #
     # MotorOff
-    # Shutdown the motor 
-    def MotorOff(self, Reset = False):
-        self.__Motor.stop()
-        if Reset:
-            self.__Motor.reset()
+    # Stop the motor 
+    def MotorOff(self):
+        self.__Motor.stop(stop_action = self.StopAction)
 
     #
-    # SetPolarity
-    # Set motor polarity
-    def SetPolarity(self, Polarity):
-        self.__Motor.polarity = Polarity
+    # MotorReset
+    # Reset the motor
+    def MotorReset(self):
+        self.Position = 0
+        self.RampDown = 0
+        self.RampUp = 0
+        self.Speed = 0
+        self.StopAction = self.__Motor.STOP_ACTION_COAST
+        self.__Motor.reset()
 
     #
-    # SetPosition
-    # Set motor position
-    def SetPosition(self, Position, SP = False):
-        if SP:
-            self.__Motor.position_sp = Position
-        else:
-            self.__Motor.position = Position
-
-    #
-    # SetRamps
-    # Set ramp up and ramp down setpoints
-    def SetRamps(self, Up, Down):
-        self.__Motor.ramp_up_sp = Up
-        self.__Motor.ramp_down_sp = Down
-
-    #
-    # SetRunForever
+    # RunForever
     # Run the motor until another command is sent
-    def SetRunForever(self):
-        self.__Motor.command = self.__Motor.COMMAND_RUN_FOREVER
+    def RunForever(self):
+        self.__Motor.run_forever(
+            ramp_down_sp = self.RampDown,
+            ramp_up_sp = self.RampUp,
+            speed_sp = self.Speed,
+            stop_action = self.StopAction
+        )
 
     #
-    # SetRunToAbsolutePosition
+    # RunToAbsolutePosition
     # Run to a position relative to the current position value
-    def SetRunToAbsolutePosition(self):
-        self.__Motor.command = self.__Motor.COMMAND_RUN_TO_ABS_POS
+    def RunToAbsolutePosition(self):
+        self.__Motor.run_to_abs_pos(
+            position_sp = self.Position,
+            ramp_down_sp = self.RampDown,
+            ramp_up_sp = self.RampUp,
+            speed_sp = self.Speed,
+            stop_action = self.StopAction
+        )
 
     #
-    # SetRunToRelativePosition
+    # RunToRelativePosition
     # Run to a position relative to the current position value
-    def SetRunToRelativePosition(self):
-        self.__Motor.command = self.__Motor.COMMAND_RUN_TO_REL_POS
-
-    #
-    # SetSpeed
-    # Set the speed_sp value
-    def SetSpeed(self, Speed, SP = False):
-        if SP:
-            self.__Motor.speed_sp = Speed
-        else:
-            self.__Motor.speed = Speed
-
-    #
-    # SetStopActionBrake
-    # Power will be removed from the motor and a passive electrical load will be placed on the motor
-    def SetStopActionBrake(self):
-        self.__Motor.stop_action = self.__Motor.STOP_ACTION_BRAKE
-
-    #
-    # SetStopActionHold
-    # Actively try to hold the motor at the current position
-    def SetStopActionHold(self):
-        self.__Motor.stop_action = self.__Motor.STOP_ACTION_HOLD
+    def RunToRelativePosition(self):
+        self.__Motor.run_to_rel_pos(
+            position_sp = self.Position,
+            ramp_down_sp = self.RampDown,
+            ramp_up_sp = self.RampUp,
+            speed_sp = self.Speed,
+            stop_action = self.StopAction
+        )
 
     #
     # WaitUntilStalled
