@@ -9,27 +9,20 @@ from ev3dev2.motor import OUTPUT_C as OutPortC
 from ev3dev2.sensor import INPUT_1 as InPort1
 from ev3dev2.sensor import INPUT_2 as InPort2
 
-# Local resources
-from Classes.BrickButton import BrickButton
-from Classes.BrickVoice import BrickVoice
-from Classes.ColorSensorArm import ColorSensorArm
-from Classes.ColorSensorUnit import ColorSensorUnit
-from Classes.RedEyes import RedEyes
-from Classes.ShufflerArm import ShufflerArm
-from Classes.TurnTable import TurnTable
+# Robot Classes
+from Classes.Robot.BrickButton import BrickButton
+from Classes.Robot.BrickVoice import BrickVoice
+from Classes.Robot.ColorSensorArm import ColorSensorArm
+from Classes.Robot.ColorSensorUnit import ColorSensorUnit
+from Classes.Robot.RedEyes import RedEyes
+from Classes.Robot.ShufflerArm import ShufflerArm
+from Classes.Robot.TurnTable import TurnTable
+
+# Rubik Classes
+from Classes.Rubik.Cube import Cube
 
 # Python
 from time import sleep as Sleep
-
-#            01 02 03
-#            04 05 06
-#            07 08 09
-#  10 11 12  19 20 21  28 29 30  37 38 39
-#  13 14 15  22 23 24  31 32 33  40 41 42
-#  16 17 18  25 26 27  34 35 36  43 44 45
-#            46 47 48
-#            49 50 51
-#            52 53 54 
 
 class CubeSolver:
     CubeMiddleSquareIndexes = [ 5, 32, 50, 23, 14, 41 ]
@@ -153,7 +146,7 @@ class CubeSolver:
         SquareCounter = 0
 
         self.Ev3ColorSensorArm.TakeOutMiddle()
-        self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRGBColor()
+        self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRgbColor()
 
         self.CubeSquareIndex += 1
         self.Ev3ColorSensorArm.TakeOutCorner()
@@ -166,7 +159,7 @@ class CubeSolver:
             CurrentPosition = self.Ev3TurnTable.GetTablePosition()
             
             if CurrentPosition >= (SquareCounter * 135) - 5:
-                self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRGBColor()
+                self.CubeSquareColors[self.CubeSquareScanOrder[self.CubeSquareIndex]] = self.Ev3ColorSensorUnit.GetRgbColor()
                 
                 self.CubeSquareIndex += 1
                 SquareCounter += 1
@@ -190,3 +183,7 @@ class CubeSolver:
 Solver = CubeSolver()
 Solver.AdjustTurnTable()
 Solver.Scan()
+
+RubikCube = Cube()
+RubikCube.ImportScannedData(ScannedData = Solver.CubeSquareColors)
+RubikCube.PrintCube()

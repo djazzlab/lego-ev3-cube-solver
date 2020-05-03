@@ -2,7 +2,7 @@
 from ev3dev2.sensor.lego import InfraredSensor
 
 # Local resources
-from Classes.Ev3Sensor import Ev3Sensor
+from Classes.Robot.Ev3Sensor import Ev3Sensor
 
 class RedEyes(Ev3Sensor):
     #

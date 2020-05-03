@@ -7,6 +7,16 @@ class Ev3Sensor:
     def __init__(self, Sensor):
         self.__Sensor = Sensor
 
+    ##################
+    # Common Methods #
+    ##################
+    #
+    # SetSensorMode
+    # Register the mode Mode to the sensor
+    def SetSensorMode(self, Mode):
+        if self.__Sensor.mode != Mode:
+            self.__Sensor.mode = Mode
+
     #################
     # Color Sensors #
     #################
@@ -14,12 +24,12 @@ class Ev3Sensor:
     # SetModeRGBRAW
     # Register the mode IR-PROX for the sensor
     def SetModeRGBRAW(self):
-        self.__Sensor.mode = self.__Sensor.MODE_RGB_RAW
+        self.SetSensorMode(Mode = self.__Sensor.MODE_RGB_RAW)
 
     #
-    # GetRGBColor
-    # Return a tuple of the RGB color code detected by the sensor
-    def GetRGBColor(self):
+    # GetRgbColor
+    # Return a tuple of the rgb color code detected by the sensor
+    def GetRgbColor(self):
         return self.__Sensor.rgb
 
     ####################
@@ -35,4 +45,4 @@ class Ev3Sensor:
     # SetModeIRProx
     # Register the mode IR-PROX for the sensor
     def SetModeIRProx(self):
-        self.__Sensor.mode = self.__Sensor.MODE_IR_PROX
+        self.SetSensorMode(Mode = self.__Sensor.MODE_IR_PROX)

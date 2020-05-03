@@ -2,7 +2,7 @@
 from ev3dev2.sensor.lego import ColorSensor
 
 # Local resources
-from Classes.Ev3Sensor import Ev3Sensor
+from Classes.Robot.Ev3Sensor import Ev3Sensor
 
 class ColorSensorUnit(Ev3Sensor):
     #

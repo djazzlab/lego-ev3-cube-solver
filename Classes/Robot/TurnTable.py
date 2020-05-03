@@ -2,7 +2,7 @@
 from ev3dev2.motor import LargeMotor
 
 # Local resources
-from Classes.Ev3Motor import Ev3Motor
+from Classes.Robot.Ev3Motor import Ev3Motor
 
 class TurnTable(Ev3Motor):
     #
