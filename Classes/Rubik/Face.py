@@ -46,6 +46,7 @@ class Face:
     def __init__(self, Name):
         self.__FaceSquares = []
         self._Name = Name
+        self.__ConfigureFace()
 
     ######################
     # Properties Methods #
@@ -187,10 +188,11 @@ class Face:
     #
     # RegisterSquare
     # Register a square definition (position and rgb color code) to the face
-    def RegisterSquare(self, Position, Red, Green, Blue):
-        print('Registering square "{}:{}"'.format(
+    def RegisterSquare(self, Position, Red, Green, Blue, ColorName):
+        print('Registering square "{}:{}:{}"'.format(
             Position,
-            (Red, Green, Blue)
+            (Red, Green, Blue),
+            ColorName
         ))
         FaceSquare = Square()
 
@@ -198,8 +200,7 @@ class Face:
         FaceSquare.Red = Red
         FaceSquare.Green = Green
         FaceSquare.Blue = Blue
-
-        FaceSquare.FindColor()
+        FaceSquare.ColorName = ColorName
 
         if Position == self._MiddleSquarePosition:
             FaceSquare.Type = 'M'

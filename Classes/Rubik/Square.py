@@ -1,7 +1,5 @@
-# Colormath Package
-from colormath.color_objects import sRGBColor, LabColor
-from colormath.color_diff import delta_e_cie2000 as DeltaCie2000
-from colormath.color_conversions import convert_color as ConvertColor
+# Python Imports
+from requests import get as GetAPI
 
 # Cube faces:
 # U = Up, L = Left, F = Front, R = Right, B = Back, D = Down
@@ -29,18 +27,15 @@ from colormath.color_conversions import convert_color as ConvertColor
 
 class Square:
     __BaseColors = {
-        'Rd': (42.55, 65.36, 50.70), # Red
-        'Or': (51.91, 51.79, 60.30), # Red Orange
-        'OR': (67.05, 42.83, 74.03), # Orange
-        'Ye': (91.29, -15.30, 86.36), # Yellow
-        'Yg': (69.71, -59.25, 69.14), # Yellow Green
-        'Gr': (51.41, -52.75, 51.85), # Green
-        'Sy': (73.88, -24.30, -34.55), # Sky Blue
-        'Bu': (42.29, 12.80, -51.30), # Blue
-        'Pu': (41.53, 48.15, -53.96), # Purple
-        'Wh': (100.00, 0.01, -0.01), # White
-        'Bl': (0.00, 0.00, 0.00)  # Black
+        'Bl': (0.00, 0.00, 0.00), # Black
+        'Bu': (32.0426042551867, 12.950151429585361, -45.17310190169409), # Blue
+        'Gr': (49.32919074877404, 3.645985298946497, -48.7013011581894), # Green
+        'Or': (91.1398835176748, -22.214881513032246, -13.748361790456599), # Orange
+        'Rd': (20.336797974719104, 34.63161034632639, 8.618994602944529), # Red
+        'Wh': (99.99998453333127, -0.0004593894083471106, -0.008561457924405325), # White
+        'Ye': (91.65285503582525, -8.473773852420429, -12.761759278634809) # Yellow
     }
+    __LABColor = None
 
     _Blue = 0
     _ColorName = None
@@ -167,25 +162,56 @@ class Square:
     # Retrieve the color related to the Red, Green and Blue rgb color codes
     def FindColor(self):
         CieData = []
+    
+        if self.__LABColor is None:
+            self.__RgbToLab()
 
-        for (ColorShortName, LABColorCode) in self.__BaseColors.iteritems():
-            Distance = DeltaCie2000(self.__RgbToLab(), LABColorCode)
-            CieData.append((Distance, ColorShortName))
+        for (ColorShortName, LABColorCode) in self.__BaseColors.items():
+            APIResponse = GetAPI(
+                'http://192.168.85.13:5000/bots-api/cube-solver/labs-distance',
+                data = {
+                    'lab1_lightness': self.__LABColor[0],
+                    'lab1_dim_a': self.__LABColor[1],
+                    'lab1_dim_b': self.__LABColor[2],
+                    'lab2_lightness': LABColorCode[0],
+                    'lab2_dim_a': LABColorCode[1],
+                    'lab2_dim_b': LABColorCode[2]
+                }
+            )
+            if APIResponse.status_code == 200:
+                CieData.append(
+                    (
+                        APIResponse.json()['Distance'],
+                        ColorShortName
+                    )
+                )
+
         CieData = sorted(CieData)
 
         if len(CieData) > 0:
             self._ColorName = CieData[0][1]
-        
-        return self._ColorName
 
     ###################
     # Private Methods #
     ###################
     #
     # RgbToLab
-    # Convert Rgb color code to lab color code
+    # Convert rgb color code to a tuple of a lab color code
     def __RgbToLab(self):
-        return ConvertColor(
-            sRGBColor(self.Red, self.Green, self.Blue, True),
-            LabColor
+        APIResponse = GetAPI(
+            'http://192.168.85.13:5000/bots-api/cube-solver/rgb-to-lab',
+            data = {
+                'red': self.Red,
+                'green': self.Green,
+                'blue': self.Blue
+            }
         )
+        if APIResponse.status_code == 200:
+            LABJson = APIResponse.json()
+            self.__LABColor = (
+                LABJson['Lab']['L'],
+                LABJson['Lab']['A'],
+                LABJson['Lab']['B']
+            )
+        else:
+            return None

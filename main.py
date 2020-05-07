@@ -185,5 +185,5 @@ Solver.AdjustTurnTable()
 Solver.Scan()
 
 RubikCube = Cube()
-RubikCube.ImportScannedData(ScannedData = Solver.CubeSquareColors)
+Result = RubikCube.ImportScannedData(ScannedData = Solver.CubeSquareColors)
 RubikCube.PrintCube()

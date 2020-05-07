@@ -3,6 +3,9 @@ from Classes.Rubik.Corner import Corner
 from Classes.Rubik.Edge import Edge
 from Classes.Rubik.Face import Face
 
+# Python Imports
+from requests import get as GetAPI
+
 # Cube faces:
 # U = Up, L = Left, F = Front, R = Right, B = Back, D = Down
 #
@@ -28,6 +31,15 @@ from Classes.Rubik.Face import Face
 #            52 53 54 
 
 class Cube:
+    __BaseColors = {
+        'Bl': (0.00, 0.00, 0.00), # Black
+        'Bu': (32.0426042551867, 12.950151429585361, -45.17310190169409), # Blue
+        'Gr': (49.32919074877404, 3.645985298946497, -48.7013011581894), # Green
+        'Or': (91.1398835176748, -22.214881513032246, -13.748361790456599), # Orange
+        'Rd': (20.336797974719104, 34.63161034632639, 8.618994602944529), # Red
+        'Wh': (99.99998453333127, -0.0004593894083471106, -0.008561457924405325), # White
+        'Ye': (91.65285503582525, -8.473773852420429, -12.761759278634809) # Yellow
+    }
     __Corners = None
     __Edges = None
     __Faces = {}
@@ -51,14 +63,29 @@ class Cube:
     # ImportScannedData
     # Import scanned data to the cube object
     def ImportScannedData(self, ScannedData):
-        for (SquarePosition, (RedCode, GreenCode, BlueCode)) in ScannedData.iteritems():
+        APIResponse = GetAPI(
+            'http://192.168.85.13:5000/bots-api/cube-solver/colors-from-json',
+            json = {
+                'base_colors': self.__BaseColors,
+                'scanned_colors': ScannedData
+            }
+        )
+        if APIResponse.status_code != 200:
+            return None
+        else:
+            ColorNames = APIResponse.json()['Result']
+
+        for (SquarePosition, (RedCode, GreenCode, BlueCode)) in ScannedData.items():
             Face = self.__FindCubeFaceFromSquarePosition(SquarePosition = SquarePosition)
             self.__Faces[Face.Name].RegisterSquare(
                 Position = SquarePosition,
                 Red = RedCode,
                 Green = GreenCode,
-                Blue = BlueCode
+                Blue = BlueCode,
+                ColorName = ColorNames[str(SquarePosition)]
             )
+
+        print(self.__Faces)
 
         self.__DefineCubeCorners()
         self.__DefineCubeEdges()
@@ -232,7 +259,7 @@ class Cube:
     # FindCubeFaceFromSquarePosition
     # Return the cube face using the square global position
     def __FindCubeFaceFromSquarePosition(self, SquarePosition):
-        for CubeFace in self.__Faces.itervalues():
+        for CubeFace in self.__Faces.values():
             if SquarePosition >= CubeFace.LesserSquarePosition and SquarePosition <= CubeFace.GreaterSquarePosition:
                 return CubeFace
         return None
